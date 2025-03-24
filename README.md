@@ -47,7 +47,7 @@ This project is a FastAPI-based application that provides endpoints for saving f
    cipher_suite = Fernet(key)
 
    encrypted_password = cipher_suite.encrypt(b'your_mongodb_password')
-   
+
    print(encrypted_password.decode())
 
 4. Store the encryption key and encrypted password in a .env file.
@@ -63,7 +63,9 @@ This project is a FastAPI-based application that provides endpoints for saving f
 2. Add the following environment variables to the .env file:
 
    MONGO_USERNAME=your_mongodb_username
+
    MONGO_PASSWORD=your_encrypted_mongodb_password
+   
    ENCRYPTION_KEY=your_encryption_key
 
    Replace your_mongodb_username, your_encrypted_mongodb_password, and your_encryption_key with the appropriate values.
