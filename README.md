@@ -17,11 +17,11 @@ This project is a FastAPI-based application that provides endpoints for saving f
 ### Setting Up the Virtual Environment
 1. Navigate to the face folder:
 
-  cd face_recognition/face
+   cd face_recognition/face
 
 2. Create a virtual environment:
 
-  python -m venv venv
+   python -m venv venv
 
 3. Activate the virtual environment:
 
@@ -43,8 +43,11 @@ This project is a FastAPI-based application that provides endpoints for saving f
    from cryptography.fernet import Fernet
 
    key = Fernet.generate_key()
+
    cipher_suite = Fernet(key)
+
    encrypted_password = cipher_suite.encrypt(b'your_mongodb_password')
+   
    print(encrypted_password.decode())
 
 4. Store the encryption key and encrypted password in a .env file.
