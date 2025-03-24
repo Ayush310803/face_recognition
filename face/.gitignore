@@ -2,4 +2,4 @@
 __pycache__
 .env
 static/
-encrypt_password
+encrypt_password.py
