@@ -1,4 +1,4 @@
-### Face Recognition API
+# Face Recognition API
 This project is a FastAPI-based application that provides endpoints for saving face images, recognizing faces from images, and processing video streams for face recognition. The application uses MongoDB for storing face data and face_recognition library for face detection and recognition.
 
 ## Table of Contents
@@ -9,12 +9,12 @@ This project is a FastAPI-based application that provides endpoints for saving f
 5. Setting Up Environment Variables
 6. Running the Application
 
-# Prerequisites
+### Prerequisites
 1. Python 3.7 or higher
 2. MongoDB Atlas account or local MongoDB instance
 3. pip package manager
 
-# Setting Up the Virtual Environment
+### Setting Up the Virtual Environment
 1. Navigate to the face folder:
   cd face_recognition/face
 
@@ -28,7 +28,7 @@ This project is a FastAPI-based application that provides endpoints for saving f
    on windows:
    venv\Scripts\activate
 
-# Setting Up MongoDB Connection
+### Setting Up MongoDB Connection
 1. Create a MongoDB Atlas cluster or use a local MongoDB instance.
 
 2. Get the connection string from MongoDB Atlas or use the local connection string.
@@ -43,38 +43,11 @@ This project is a FastAPI-based application that provides endpoints for saving f
 
 4. Store the encryption key and encrypted password in a .env file.
 
-# Installing Requirements
+### Installing Requirements
 1. Install the required packages:
    pip install -r requirements.txt
 
-   The requirements.txt file should include the following packages:
-    annotated-types==0.7.0
-    anyio==4.8.0
-    cffi==1.17.1
-    click==8.1.8
-    cryptography==44.0.2
-    dlib==19.24.6
-    dnspython==2.7.0
-    face-recognition==1.3.0
-    fastapi==0.115.11
-    h11==0.14.0
-    idna==3.10
-    mongoengine==0.29.1
-    numpy==2.2.3
-    opencv-python==4.11.0.86
-    pillow==11.1.0
-    pycparser==2.22
-    pydantic==2.10.6
-    pydantic_core==2.27.2
-    pymongo==4.11.1
-    python-dotenv==1.0.1
-    sniffio==1.3.1
-    SQLAlchemy==2.0.38
-    starlette==0.46.0
-    typing_extensions==4.12.2
-    uvicorn==0.34.0
-
-# Setting Up Environment Variables
+### Setting Up Environment Variables
 1. Create a .env file in the face directory.
 
 2. Add the following environment variables to the .env file:
@@ -84,7 +57,7 @@ This project is a FastAPI-based application that provides endpoints for saving f
 
    Replace your_mongodb_username, your_encrypted_mongodb_password, and your_encryption_key with the appropriate values.
 
-# Running the Application
+### Running the Application
 1. Start the FastAPI application:
    uvicorn main:app --reload
 
