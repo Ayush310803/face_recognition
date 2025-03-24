@@ -23,22 +23,26 @@ This project is a FastAPI-based application that provides endpoints for saving f
 ### Setting Up the Virtual Environment
 1. Navigate to the face folder:
 
+   ```
    cd face_recognition/face
+   ```
 
 2. Create a virtual environment:
 
+   ```
    python -m venv venv
+   ```
 
 3. Activate the virtual environment:
 
    on linux:
-
+   ```
    source venv/bin/activate
-
+   ```
    on windows:
-
+   ```
    venv\Scripts\activate
-
+   ```
 ---   
 
 ### Setting Up MongoDB Connection
@@ -47,7 +51,7 @@ This project is a FastAPI-based application that provides endpoints for saving f
 2. Get the connection string from MongoDB Atlas or use the local connection string.
 
 3. Encrypt your MongoDB password using Fernet encryption. You can use the following Python code to generate an encrypted password:
-
+```
    from cryptography.fernet import Fernet
 
    key = Fernet.generate_key()
@@ -57,6 +61,7 @@ This project is a FastAPI-based application that provides endpoints for saving f
    encrypted_password = cipher_suite.encrypt(b'your_mongodb_password')
 
    print(encrypted_password.decode())
+```
 
 4. Store the encryption key and encrypted password in a .env file.
 
@@ -73,12 +78,13 @@ This project is a FastAPI-based application that provides endpoints for saving f
 1. Create a .env file in the face directory.
 
 2. Add the following environment variables to the .env file:
-
+```
    MONGO_USERNAME=your_mongodb_username
 
    MONGO_PASSWORD=your_encrypted_mongodb_password
 
    ENCRYPTION_KEY=your_encryption_key
+```
 
    Replace your_mongodb_username, your_encrypted_mongodb_password, and your_encryption_key with the appropriate values.
 
