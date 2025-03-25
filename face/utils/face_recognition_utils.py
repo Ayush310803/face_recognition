@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 from models.face_model import FaceImage
 from fastapi import UploadFile, File
+from fastapi import HTTPException
 
 def cosine_similarity(vec1, vec2):
     vec1 = np.array(vec1)
@@ -251,3 +252,97 @@ async def recognize_faces_video(file: UploadFile):
 
     recognized_faces_list = [{"name": name, "similarity": similarity} for name, similarity in known_faces.items()]
     return {"recognized_faces": recognized_faces_list}
+
+async def save_face_from_upload(name: str, file: UploadFile):
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="File must be an image")
+    
+    if not os.path.exists("static/images"):
+        os.makedirs("static/images")
+
+    image_filename = f"{name}_{datetime.now().strftime('%Y%m%d%H%M%S')}.jpg"
+    image_path = os.path.join("static/images", image_filename)
+    
+    try:
+        with open(image_path, "wb") as buffer:
+            buffer.write(await file.read())
+        
+        img = cv2.imread(image_path)
+        if img is None:
+            os.remove(image_path)
+            raise HTTPException(status_code=400, detail="Invalid image file")
+            
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        face_encodings = face_recognition.face_encodings(img_rgb)
+        if len(face_encodings) == 0:
+            os.remove(image_path)
+            raise HTTPException(status_code=400, detail="No face detected in the image")
+            
+        face = FaceImage(name=name, image_path=image_path)
+        face.save()
+        
+        return {"message": "Face saved successfully", "path": image_path}
+        
+    except Exception as e:
+        if os.path.exists(image_path):
+            os.remove(image_path)
+        raise HTTPException(status_code=500, detail=f"Error saving face: {str(e)}")
+
+async def recognize_faces_from_upload(file: UploadFile):
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="File must be an image")
+
+    temp_path = f"temp_{file.filename}"
+    
+    try:
+        with open(temp_path, "wb") as buffer:
+            buffer.write(await file.read())
+
+        frame = cv2.imread(temp_path)
+        if frame is None:
+            raise HTTPException(status_code=400, detail="Could not read the uploaded image file")
+
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        captured_encodings = face_recognition.face_encodings(frame_rgb)
+        if len(captured_encodings) == 0:
+            return {"recognized_faces": ["No face detected"]}
+
+        recognized_faces = []
+
+        for captured_encoding in captured_encodings:
+            best_match_name = "Unknown"
+            best_similarity = 0.0
+
+            for db_face in FaceImage.objects:
+                if not os.path.exists(db_face.image_path):
+                    continue 
+
+                stored_img = cv2.imread(db_face.image_path)
+                if stored_img is None:
+                    continue  
+
+                stored_img_rgb = cv2.cvtColor(stored_img, cv2.COLOR_BGR2RGB)
+                stored_encodings = face_recognition.face_encodings(stored_img_rgb)
+                if len(stored_encodings) == 0:
+                    continue  
+
+                matches = face_recognition.compare_faces(stored_encodings, captured_encoding)
+                similarity_scores = [cosine_similarity(stored_enc, captured_encoding) 
+                                  for stored_enc in stored_encodings]
+
+                if True in matches:
+                    best_match_index = np.argmax(similarity_scores)  
+                    if similarity_scores[best_match_index] > best_similarity:
+                        best_match_name = db_face.name
+                        best_similarity = round(similarity_scores[best_match_index], 4)
+
+            recognized_faces.append({"name": best_match_name, "similarity": best_similarity})
+
+        return {"recognized_faces": recognized_faces}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
