@@ -13,7 +13,10 @@ def cosine_similarity(vec1, vec2):
     vec2 = np.array(vec2)
     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
-async def save_face(name: str):
+async def save_face(name: str, is_live: str = "close"):
+    if is_live != "open":
+        return {"message": "Camera not opened. is_live is set to 'close'."}
+
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         raise HTTPException(status_code=500, detail="Could not open webcam")
@@ -40,7 +43,10 @@ async def save_face(name: str):
 
     return {"message": "Face saved successfully"}
 
-async def recognize_faces():
+async def recognize_faces(is_live: str = "close"):
+    if is_live != "open":
+        return {"message": "Camera not opened. is_live is set to 'close'."}
+    
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         raise HTTPException(status_code=500, detail="Could not open webcam")
@@ -53,10 +59,10 @@ async def recognize_faces():
         raise HTTPException(status_code=500, detail="Could not read frame from webcam")
 
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
     captured_encodings = face_recognition.face_encodings(frame_rgb)
+
     if len(captured_encodings) == 0:
-        return {"recognized_faces": ["No face detected"]}
+        return {"recognized_faces": ["No face detected"], "is_live": is_live}
 
     recognized_faces = []
 
@@ -66,32 +72,36 @@ async def recognize_faces():
 
         for db_face in FaceImage.objects:
             if not os.path.exists(db_face.image_path):
-                continue 
+                continue
 
             stored_img = cv2.imread(db_face.image_path)
             if stored_img is None:
-                continue  
+                continue
 
             stored_img_rgb = cv2.cvtColor(stored_img, cv2.COLOR_BGR2RGB)
-
             stored_encodings = face_recognition.face_encodings(stored_img_rgb)
             if len(stored_encodings) == 0:
-                continue  
+                continue
 
-            matches = face_recognition.compare_faces(stored_encodings, captured_encoding)
-            similarity_scores = [cosine_similarity(stored_enc, captured_encoding) for stored_enc in stored_encodings]
+            similarity_scores = [
+                np.dot(stored_enc, captured_encoding) / 
+                (np.linalg.norm(stored_enc) * np.linalg.norm(captured_encoding)) 
+                for stored_enc in stored_encodings
+            ]
 
-            if True in matches:
-                best_match_index = np.argmax(similarity_scores)  
-                if similarity_scores[best_match_index] > best_similarity:
-                    best_match_name = db_face.name
-                    best_similarity = round(similarity_scores[best_match_index], 4)
+            best_match_index = np.argmax(similarity_scores)
+            if similarity_scores[best_match_index] > best_similarity:
+                best_match_name = db_face.name
+                best_similarity = round(similarity_scores[best_match_index], 4)
 
         recognized_faces.append({"name": best_match_name, "similarity": best_similarity})
 
-    return {"recognized_faces": recognized_faces}
+    return {"recognized_faces": recognized_faces, "is_live": is_live}
 
-async def capture_and_recognize_video():
+async def capture_and_recognize_video(is_live: str = "close"):
+    if is_live != "open":
+        return {"message": "Camera not opened. is_live is set to 'close'."}
+        
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         raise HTTPException(status_code=500, detail="Could not open webcam")
